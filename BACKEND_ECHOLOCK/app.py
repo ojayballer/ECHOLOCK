@@ -1,4 +1,3 @@
-import sqlite3
 import hashlib
 import os
 import requests
@@ -8,14 +7,31 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from utils import extract_url_features, load_model, predict_url
 from federation import publish_new_threat
+import redis
+from dotenv import load_dotenv
+
+# Load .env variables (REDIS_HOST, REDIS_PASS, etc.)
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
 PHISHING_LIST_URL = 'https://raw.githubusercontent.com/Phishing-Database/Phishing.Database/refs/heads/master/phishing-links-ACTIVE.txt'
 CACHE_FILE = 'phishing_urls.txt'
-DB_FILE = 'echolock_federation.db'
 CACHE_HOURS = 6
+
+try:
+    redis_client_check = redis.Redis(
+        host=os.getenv("REDIS_HOST"),
+        port=os.getenv("REDIS_PORT"),
+        password=os.getenv("REDIS_PASS"),
+        decode_responses=True
+    )
+    redis_client_check.ping()
+    print(" App connected to Redis Cloud for checking.")
+except Exception as e:
+    print(f" App connection to Redis failed: {e}")
+    redis_client_check = None
 
 TOP_DOMAINS = {
     'google.com', 'www.google.com', 'youtube.com', 'gmail.com', 'android.com',
@@ -28,16 +44,10 @@ TOP_DOMAINS = {
     'stackoverflow.com', 'npm.community', 'npmjs.com', 'pypi.org',
     'cloudflare.com', 'vercel.com', 'netlify.com', 'heroku.com',
     'twitter.com', 't.co', 'x.com', 'tiktok.com', 'reddit.com', 'pinterest.com',
-    'tumblr.com', 'flickr.com', 'twitch.tv', 'discord.com', 'discordapp.com',
-    'slack.com', 'zoom.us', 't.me', 'telegram.org',
-    'netflix.com', 'hulu.com', 'disneyplus.com',
     'paypal.com', 'www.paypal.com', 'paypalobjects.com',
     'chase.com', 'bankofamerica.com', 'wellsfargo.com', 'citi.com', 'americanexpress.com',
-    'stripe.com', 'square.com', 'venmo.com', 'cash.app',
     'ebay.com', 'walmart.com', 'target.com', 'bestbuy.com', 'shopify.com', 'etsy.com',
-    'airbnb.com', 'uber.com', 'lyft.com', 'booking.com', 'expedia.com',
     'wikipedia.org', 'wikimedia.org', 'wordpress.com', 'wp.com', 'wordpress.org',
-    'blogspot.com', 'blogger.com', 'medium.com', 'wix.com', 'squarespace.com',
     'godaddy.com', 'namecheap.com'
 }
 
@@ -63,20 +73,17 @@ def is_url_in_database(url):
     if netloc in TOP_DOMAINS or any(netloc.endswith('.' + d) for d in TOP_DOMAINS):
         return True, "safe_allowlist"
 
-    #  Federated DB Check
+    # FEDERATED DB CHECK USING redis
     try:
-        with sqlite3.connect(DB_FILE) as con:
-            cur = con.cursor()
-            cur.execute("SELECT 1 FROM federated_blocklist WHERE ioc_hash = ?", (url_hash,))
-            if cur.fetchone(): return True, "federation_match"
-    except:
-        pass
+        # 'sismember' checks if the hash is in our Redis 'set'
+        if redis_client_check and redis_client_check.sismember("federated_blocklist", url_hash):
+            return True, "federation_match"
+    except Exception as e:
+        print(f"Redis check error: {e}")
 
     #  Static Phishing List Check
-    if cleaned_url in known_phishing_urls:
-        return True, "exact_match"
-    if netloc in known_phishing_netlocs: 
-        return True, "domain_match"
+    if cleaned_url in known_phishing_urls: return True, "exact_match"
+    if netloc in known_phishing_netlocs: return True, "domain_match"
 
     return False, "not_found"
 
@@ -101,7 +108,7 @@ def get_url_verdict(url):
 
 def download_phishing_list():
     global known_phishing_urls, known_phishing_netlocs, last_download_time
-    print(" Downloading phishing list from GitHub...")
+    print("⬇ Downloading phishing list from GitHub...")
     try:
         response = requests.get(PHISHING_LIST_URL, timeout=30)
         if response.status_code == 200:
@@ -115,7 +122,7 @@ def download_phishing_list():
             last_download_time = datetime.now()
             with open(CACHE_FILE, 'w', encoding='utf-8') as f:
                 for url in urls: f.write(f"{url}\n")
-            print(f" Downloaded {len(urls)} URLs.")
+            print(f"Downloaded {len(urls)} URLs.")
             return True
     except Exception as e: print(f" Download failed: {e}"); return False
 
@@ -131,47 +138,45 @@ def load_from_saved_file():
                 netlocs.add(get_netloc(line))
         known_phishing_urls, known_phishing_netlocs = urls, netlocs
         last_download_time = datetime.fromtimestamp(os.path.getmtime(CACHE_FILE))
-        print(f" Loaded {len(urls)} URLs from cache.")
+        print(f"Loaded {len(urls)} URLs from cache.")
         return True
     except: return False
 
-#API ENDPOINTS 
 @app.route('/api/check', methods=['POST'])
 def check_url_endpoint():
     try:
-        # Auto-update database if it's too old
         if last_download_time is None or (datetime.now() - last_download_time).total_seconds() / 3600 > CACHE_HOURS:
              if not load_from_saved_file(): download_phishing_list()
-        
         data = request.get_json()
         url = data.get('url', '').strip()
         if not url: return jsonify({'error': 'No URL provided'}), 400
-        
         result = get_url_verdict(url)
         return jsonify({'url': url, 'verdict': result['verdict'], 'confidence': result['confidence']})
     except Exception as e: return jsonify({'error': str(e)}), 500
 
-
 @app.route('/api/status', methods=['GET'])
 def status_endpoint():
-    # Calculate total real threats for the counter
-    total = len(known_phishing_urls) + len(known_phishing_netlocs)
+    total_threats = len(known_phishing_urls) + len(known_phishing_netlocs)
     
+    # Get federated count from Redis
+    federated_count = 0
+    if redis_client_check:
+        try:
+            federated_count = redis_client_check.scard("federated_blocklist")
+        except:
+            pass # Fails if redis is down
+
     return jsonify({
-       
         'status': 'ONLINE',
-       
         'node_integrity': 100,
-        
-        'total_threats': total,
+        'total_threats': total_threats + federated_count, 
         'last_updated': last_download_time.strftime('%Y-%m-%d %H:%M:%S') if last_download_time else 'Never'
     })
+
 if __name__ == "__main__":
     print("--- ECHOLOCK Node Starting ---")
     model = load_model()
-    
     if not load_from_saved_file():
         download_phishing_list()
-        
-    print(" ECHOLOCK NODE READY on port 5000")
+    print("ECHOLOCK NODE READY on port 5000")
     app.run(debug=True, port=5000)
