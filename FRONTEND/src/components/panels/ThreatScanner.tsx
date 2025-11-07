@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { GlassCard } from '@/components/GlassCard';
 import { toast } from '@/hooks/use-toast';
 
-const API_BASE_URL = "http://127.0.0.1:5000";
+// Check if the production environment variable exists, otherwise use the development default
+const BASE_API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
 
 // Types
 interface ScanResult {
