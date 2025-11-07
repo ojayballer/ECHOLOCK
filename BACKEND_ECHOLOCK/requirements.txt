@@ -22,7 +22,6 @@ cycler==0.12.1
 debugpy==1.8.17
 decorator==5.2.1
 defusedxml==0.7.1
-docker==7.1.0
 executing==2.2.1
 fastjsonschema==2.21.2
 filelock==3.20.0
@@ -102,7 +101,6 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.2.1
 python-json-logger==4.0.0
 pytz==2025.2
-pywin32==311
 pywinpty==3.0.2
 PyYAML==6.0.3
 pyzmq==27.1.0
