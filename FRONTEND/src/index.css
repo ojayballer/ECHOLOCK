@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* ECHOLOCK Cybersecurity Theme - Dark Neon */
+    --background: 217 82% 7%;
+    --foreground: 180 100% 90%;
+
+    --card: 220 30% 12%;
+    --card-foreground: 180 100% 90%;
+
+    --popover: 220 30% 10%;
+    --popover-foreground: 180 100% 90%;
+
+    --primary: 187 100% 50%;
+    --primary-foreground: 217 82% 7%;
+
+    --secondary: 282 67% 71%;
+    --secondary-foreground: 217 82% 7%;
+
+    --muted: 220 20% 20%;
+    --muted-foreground: 180 20% 60%;
+
+    --accent: 167 80% 59%;
+    --accent-foreground: 217 82% 7%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 30% 18%;
+    --input: 220 30% 18%;
+    --ring: 187 100% 50%;
+
+    --radius: 0.75rem;
+
+    /* Glassmorphism */
+    --glass-bg: 220 30% 12% / 0.5;
+    --glass-border: 187 100% 50% / 0.2;
+    
+    /* Neon Glow Colors */
+    --glow-cyan: 187 100% 50%;
+    --glow-magenta: 282 67% 71%;
+    --glow-aqua: 167 80% 59%;
+
+    /* Chart colors */
+    --chart-1: 187 100% 50%;
+    --chart-2: 282 67% 71%;
+    --chart-3: 167 80% 59%;
+    --chart-4: 30 100% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-gradient-to-br from-[#0B132B] via-[#020617] to-[#000000] text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Orbitron', 'Inter', sans-serif;
+    font-weight: 700;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--glass-border));
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 20px hsl(var(--glow-cyan) / 0.5), 
+                0 0 40px hsl(var(--glow-cyan) / 0.3);
+  }
+
+  .glow-magenta {
+    box-shadow: 0 0 20px hsl(var(--glow-magenta) / 0.5),
+                0 0 40px hsl(var(--glow-magenta) / 0.3);
+  }
+
+  .glow-aqua {
+    box-shadow: 0 0 20px hsl(var(--glow-aqua) / 0.5),
+                0 0 40px hsl(var(--glow-aqua) / 0.3);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 10px currentColor,
+                 0 0 20px currentColor,
+                 0 0 30px currentColor;
+  }
+}
