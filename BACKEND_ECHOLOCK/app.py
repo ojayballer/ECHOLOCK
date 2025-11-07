@@ -12,9 +12,9 @@ from dotenv import load_dotenv
 
 # Load .env variables (REDIS_HOST, REDIS_PASS, etc.)
 load_dotenv()
-
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
+
 
 PHISHING_LIST_URL = 'https://raw.githubusercontent.com/Phishing-Database/Phishing.Database/refs/heads/master/phishing-links-ACTIVE.txt'
 CACHE_FILE = 'phishing_urls.txt'
