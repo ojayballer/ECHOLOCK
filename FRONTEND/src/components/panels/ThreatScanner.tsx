@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { GlassCard } from '@/components/GlassCard';
 import { toast } from '@/hooks/use-toast';
 
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = process.env.NODE_ENV === 'production'? 'https://echolock-production.up.railway.app'  : 'http://localhost:5000';
 
 interface ScanResult {
   is_phishing: boolean;
