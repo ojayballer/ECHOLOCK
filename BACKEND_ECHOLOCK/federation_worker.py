@@ -8,7 +8,7 @@ load_dotenv()
 REDIS_HOST = os.getenv("REDIS_HOST")
 REDIS_CHANNEL = os.getenv("REDIS_CHANNEL")
 REDIS_PASS = os.getenv("REDIS_PASS")
-REDISUSER = os.getenv("REDISUSER")
+
 
 port_str = os.getenv("REDIS_PORT")
 REDIS_PORT = int(port_str) if port_str else None
@@ -25,7 +25,6 @@ def run_subscriber():
         host=REDIS_HOST,
         port=REDIS_PORT,
         password=REDIS_PASS,
-        username=REDISUSER,
         decode_responses=True
     )
     p = r.pubsub()
