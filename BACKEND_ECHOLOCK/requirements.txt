@@ -5,4 +5,5 @@ requests
 python-dotenv
 redis
 pandas
+scikit-learn
 honcho
