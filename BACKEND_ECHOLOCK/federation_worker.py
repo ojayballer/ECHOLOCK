@@ -25,6 +25,7 @@ def run_subscriber():
         host=REDIS_HOST,
         port=REDIS_PORT,
         password=REDIS_PASS,
+        username=REDISUSER,
         decode_responses=True
     )
     p = r.pubsub()

@@ -22,6 +22,7 @@ try:
             host=REDIS_HOST,
             port=REDIS_PORT,
             password=REDIS_PASS,
+            username=REDISUSER,
             decode_responses=True
         )
         redis_client.ping()
