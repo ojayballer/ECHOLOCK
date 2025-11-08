@@ -6,10 +6,8 @@ import { Input } from '@/components/ui/input';
 import { GlassCard } from '@/components/GlassCard';
 import { toast } from '@/hooks/use-toast';
 
-// Check if the production environment variable exists, otherwise use the development default
-const BASE_API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+const API_BASE_URL = 'http://localhost:5000';
 
-// Types
 interface ScanResult {
   is_phishing: boolean;
   confidence: number;
@@ -32,7 +30,6 @@ export const ThreatScanner = () => {
   const [federationStatus, setFederationStatus] = useState<FederationStatus | null>(null);
   const [isOnline, setIsOnline] = useState(false);
 
-  // Poll federation status every 5 seconds
   useEffect(() => {
     const fetchStatus = async () => {
       try {
@@ -50,8 +47,8 @@ export const ThreatScanner = () => {
       }
     };
 
-    fetchStatus(); // Initial fetch
-    const interval = setInterval(fetchStatus, 5000); // Poll every 5 seconds
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 5000);
 
     return () => clearInterval(interval);
   }, []);
@@ -91,7 +88,6 @@ export const ThreatScanner = () => {
 
       setResult(mappedResult);
 
-      // Show toast notification
       toast({
         title: mappedResult.is_phishing ? '⚠️ THREAT DETECTED' : '✅ URL Safe',
         description: `Confidence: ${mappedResult.confidence.toFixed(1)}%`,
@@ -169,7 +165,7 @@ export const ThreatScanner = () => {
             <div>
               <p className="text-xs text-muted-foreground font-mono">NODE INTEGRITY</p>
               <p className="text-sm font-bold font-mono">
-                 100%
+                  100%
               </p>
             </div>
           </div>
