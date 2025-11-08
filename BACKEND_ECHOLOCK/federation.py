@@ -8,6 +8,7 @@ load_dotenv()
 REDIS_HOST = os.getenv("REDIS_HOST")
 REDIS_CHANNEL = os.getenv("REDIS_CHANNEL")
 REDIS_PASS = os.getenv("REDIS_PASS")
+REDISUSER = os.getenv("REDISUSER")
 
 port_str = os.getenv("REDIS_PORT")
 REDIS_PORT = int(port_str) if port_str else None
