@@ -4,15 +4,22 @@ import os
 from datetime import datetime
 from dotenv import load_dotenv
 
-# Load variables from .env file
 load_dotenv()
 REDIS_HOST = os.getenv("REDIS_HOST")
-REDIS_PORT = os.getenv("REDIS_PORT")
-REDIS_PASS = os.getenv("REDIS_PASS")
 REDIS_CHANNEL = os.getenv("REDIS_CHANNEL")
+REDIS_PASS = os.getenv("REDIS_PASS")
+
+port_str = os.getenv("REDIS_PORT")
+REDIS_PORT = int(port_str) if port_str else None
 
 def run_subscriber():
     print("Attempting to connect to Redis as a Subscriber...")
+
+    if not all([REDIS_HOST, REDIS_PORT, REDIS_PASS, REDIS_CHANNEL]):
+        print("ERROR: Missing Redis variables. Worker cannot start.")
+        time.sleep(10)
+        return
+
     r = redis.Redis(
         host=REDIS_HOST,
         port=REDIS_PORT,
@@ -37,12 +44,11 @@ def run_subscriber():
             print("-----------------------------------------")
 
 if __name__ == "__main__":
-
     while True:
         try:
             run_subscriber()
-        except redis.exceptions.ConnectionError:
-            print(f" Connection lost. Retrying in 10 seconds...")
+        except redis.exceptions.ConnectionError as e:
+            print(f"Connection lost: {e}. Retrying in 10 seconds...")
             time.sleep(10)
         except KeyboardInterrupt:
             print("\nShutting down worker...")
