@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 load_dotenv()
 app = Flask(__name__)
 
-CORS(app, resources={r"/api/*": {"origins": "*"}})     
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 PHISHING_LIST_URL = 'https://raw.githubusercontent.com/Phishing-Database/Phishing.Database/refs/heads/master/phishing-links-ACTIVE.txt'
 CACHE_FILE = 'phishing_urls.txt'
 CACHE_HOURS = 6
@@ -173,7 +173,7 @@ def status_endpoint():
 T   })
 
 
-print("--- ECHOLOCK Node Starting ---")
+print("-- ECHOLOCK Node Starting --")
 model = load_model()
 if not load_from_saved_file():
     download_phishing_list()
