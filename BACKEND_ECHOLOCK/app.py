@@ -5,17 +5,16 @@ from datetime import datetime
 from urllib.parse import urlparse
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from utils import extract_url_features, load_model, predict_url
+from utils import load_model, predict_url
 from federation import publish_new_threat
 import redis
 from dotenv import load_dotenv
 
-# Load .env variables (REDIS_HOST, REDIS_PASS, etc.)
 load_dotenv()
 app = Flask(__name__)
 
 CORS(app, resources={r"/api/*": {"origins": "*"}})
-PHISHING_LIST_URL = 'https://raw.githubusercontent.com/Phishing-Database/Phishing.Database/refs/heads/master/phishing-links-ACTIVE.txt'
+PHISHING_LIST_URL = 'https://raw.githubusercontent.com/Phishing-Database/Phishing.Database/refs/heads/master/phISHING-links-ACTIVE.txt'
 CACHE_FILE = 'phishing_urls.txt'
 CACHE_HOURS = 6
 
@@ -68,19 +67,15 @@ def is_url_in_database(url):
     netloc = get_netloc(url)
     url_hash = hashlib.sha256(netloc.encode('utf-8')).hexdigest()
 
-    #  Allow-List Check
     if netloc in TOP_DOMAINS or any(netloc.endswith('.' + d) for d in TOP_DOMAINS):
         return True, "safe_allowlist"
 
-    # FEDERATED DB CHECK USING redis
     try:
-        # checks if the hash is in our Redis 'set'
         if redis_client_check and redis_client_check.sismember("federated_blocklist", url_hash):
             return True, "federation_match"
     except Exception as e:
         print(f"Redis check error: {e}")
 
-    #  Static Phishing List Check
     if cleaned_url in known_phishing_urls: return True, "exact_match"
     if netloc in known_phishing_netlocs: return True, "domain_match"
 
@@ -93,15 +88,19 @@ def get_url_verdict(url):
             return {'verdict': 'normal', 'confidence': 100}
         return {'verdict': 'phishing', 'confidence': 100}
 
-    features = extract_url_features(url)
-    ml_result = predict_url(model, features)
+    ml_result = predict_url(model, url) 
     ml_verdict = ml_result.get('prediction', 'normal')
     ml_conf = ml_result.get('confidence', 0.0)
-    norm_conf = ml_conf / 100.0 if ml_conf > 1.0 else ml_conf
 
     if ml_verdict == 'phishing':
-        publish_new_threat(get_netloc(url))
-        return {'verdict': 'normal', 'confidence': max(0.0, 1.0 - norm_conf)}
+        
+        if ml_conf > 90:
+            print(f"High confidence threat. Publishing {url} to federation.")
+            publish_new_threat(get_netloc(url))
+            return {'verdict': 'phishing', 'confidence': ml_conf}
+        else:
+            print(f"Low confidence threat. NOT publishing {url}.")
+            return {'verdict': 'phishing', 'confidence': ml_conf}
     
     return {'verdict': 'normal', 'confidence': ml_conf}
 
@@ -157,13 +156,12 @@ def check_url_endpoint():
 def status_endpoint():
     total_threats = len(known_phishing_urls) + len(known_phishing_netlocs)
     
-    # Get federated count from Redis
     federated_count = 0
     if redis_client_check:
         try:
             federated_count = redis_client_check.scard("federated_blocklist")
         except:
-            pass # Fails if redis is down
+            pass 
 
     return jsonify({
         'status': 'ONLINE',
