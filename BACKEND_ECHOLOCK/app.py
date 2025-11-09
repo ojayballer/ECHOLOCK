@@ -26,7 +26,7 @@ try:
         decode_responses=True
     )
     redis_client_check.ping()
-    print(" App connected to Redis Cloud for checking.")
+    print(" App connected to Redis Cloud for checking....")
 except Exception as e:
     print(f" App connection to Redis failed: {e}")
     redis_client_check = None

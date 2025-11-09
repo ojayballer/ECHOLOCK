@@ -8,7 +8,7 @@ def load_model():
     try:
         with open('ECHOLOCK.pkl', 'rb') as file:
             model = pickle.load(file)
-        print("ECHOLOCK.pkl loaded successfully.")
+        print("ECHOLOCK.pkl loaded successfully...")
         return model
     except Exception as e:
         print(f"Error loading new model: {str(e)}")
