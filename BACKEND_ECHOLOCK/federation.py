@@ -15,7 +15,7 @@ REDIS_PORT = int(port_str) if port_str else None
 
 try:
     if not all([REDIS_HOST, REDIS_PORT, REDIS_PASS]):
-         print("WARNING: Missing Redis variables. Federation Layer is OFF.")
+         print("WARNING: Missing Redis variables... Federation Layer is OFF.")
          redis_client = None
     else:
         redis_client = redis.Redis(
