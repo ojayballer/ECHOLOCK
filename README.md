@@ -299,7 +299,7 @@ This endpoint analyzes a URL and returns a verdict.
 
 The `MODEL/NOTEBOOK/ECHOLOCK.ipynb` notebook documents part of my experimentation process, specifically my work with a **RandomForest** classifier that achieved **92% accuracy** on the validation set.
 
-However, my model selection process extended beyond what is shown in the notebook. I experimented with multiple algorithms including **LinearSVC**, **Logistic Regression**, and **Gradient Boosting** through separate training scripts. After extensive benchmarking and performance analysis, I chose **LinearSVC** (Linear Support Vector Classifier) for the final production deployment, saved as `ECHOLOCK.pkl`.
+However, my model selection process extended beyond what is shown in the notebook. I experimented with multiple algorithms including **LSTMS**,**LinearSVC**, **Logistic Regression**, and **Gradient Boosting** through separate training scripts. After extensive benchmarking and performance analysis, I chose **LinearSVC** (Linear Support Vector Classifier) for the final production deployment, saved as `ECHOLOCK.pkl`.
 
 ### Why LinearSVC?
 
