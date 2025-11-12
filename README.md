@@ -1,4 +1,3 @@
-
 # ECHOLOCK
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/ojayballer/ECHOLOCK)
@@ -30,7 +29,7 @@ This project was built for the Cyber AI Hackathon 2025.
 | :---: | :---: |
 | <img width="800" alt="ECHOLOCK Main UI" src="./examples/normal_verdict.png"> | <img width="800" alt="ECHOLOCK Phishing Result" src="./examples/phishing_verdict.png"> |
 
-**Demo Video:** `[]`
+**Demo Video:** `[PASTE YOUR YOUTUBE/LOOM VIDEO LINK HERE]`
 
 ---
 
