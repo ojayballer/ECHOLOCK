@@ -145,7 +145,7 @@ The repository is organized into the following main directories:
 │   ├── federation.py       # Publishes new threats
 │   ├── federation_worker.py # Subscriber worker
 │   ├── utils.py            # Model loading & prediction logic
-│   ├── ECHOLOCK.pkl        # The pre-trained LinearSVC model
+│   ├── ECHOLOCK.pkl        # The saved LinearSVC model
 │   ├── requirements.txt
 │   ├── Procfile
 │   └── ...
