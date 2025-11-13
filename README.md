@@ -648,16 +648,7 @@ I chose to include only the RandomForest experimentation notebook in the reposit
 
 ## Contributing
 
-<div align="center">
-
 **Contributions are what make the open-source community an amazing place to learn and create.**
-
-![Contributors](https://img.shields.io/github/contributors/ojayballer/ECHOLOCK?style=for-the-badge)
-![Forks](https://img.shields.io/github/forks/ojayballer/ECHOLOCK?style=for-the-badge)
-![Stars](https://img.shields.io/github/stars/ojayballer/ECHOLOCK?style=for-the-badge)
-![Issues](https://img.shields.io/github/issues/ojayballer/ECHOLOCK?style=for-the-badge)
-
-</div>
 
 ### How to Contribute
 ```bash
