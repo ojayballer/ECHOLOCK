@@ -100,7 +100,7 @@ Real-time verdict with confidence scoring
 
 </details>
 
----## Key Features
+### Key Features
 
 ### Multi-Layer Hybrid Validation
 
