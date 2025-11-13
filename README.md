@@ -100,7 +100,9 @@ Real-time verdict with confidence scoring
 
 </details>
 
-### Key Features
+---
+
+## Key Features
 
 ### Multi-Layer Hybrid Validation
 
@@ -169,9 +171,6 @@ Built on **Redis Pub/Sub** for real-time threat intelligence sharing:
 - **Backend API** — Flask orchestration layer
 - **Federation Worker** — Python subscriber
 - **Redis Cloud** — Pub/Sub broker + Database
-</td>
-</tr>
-</table>
 
 ---
 
