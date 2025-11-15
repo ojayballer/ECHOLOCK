@@ -47,7 +47,7 @@
 
 ## Overview
 
-ECHOLOCK is a cybersecurity application I designed to combat the growing sophistication of phishing attacks. Unlike traditional, isolated scanners, ECHOLOCK operates as a **collective defense network**. It solves the problem of reactive threat intelligence by implementing a federated architecture.
+ECHOLOCK is a cybersecurity application  designed to combat the growing sophistication of phishing attacks. Unlike traditional, isolated scanners, ECHOLOCK operates as a **collective defense network**. It solves the problem of reactive threat intelligence by implementing a federated architecture.
 
 ### The Problem
 
