@@ -140,29 +140,12 @@ Real-time verdict with confidence scoring
 
 ECHOLOCK employs a sophisticated **fast-to-slow** validation pipeline:
 
-<div align="center">
+**① Static Allowlist** → Instant approval for trusted domains  
+**② Static Blocklist** → Instant block for known malicious domains  
+**③ Federated Blocklist** → Check network-shared threat intelligence  
+**④ AI Analysis (LinearSVC)** → Machine learning classification for unknown URLs
 
-```
-╔═══════════════════════════════════════╗
-║  VALIDATION PIPELINE                  ║
-╠═══════════════════════════════════════╣
-║                                       ║
-║  ① Static Allowlist                  ║
-║     └─→ Instant approval for trusted ║
-║                                       ║
-║  ② Static Blocklist                  ║
-║     └─→ Instant block for known bad  ║
-║                                       ║
-║  ③ Federated Blocklist               ║
-║     └─→ Check federation intel       ║
-║                                       ║
-║  ④ AI Analysis (LinearSVC)           ║
-║     └─→ ML classification            ║
-║                                       ║
-╚═══════════════════════════════════════╝
-```
-
-</div>
+Each layer acts as a checkpoint, ensuring **maximum speed** for known URLs while maintaining **accuracy** for unknown threats.
 
 Each layer acts as a checkpoint, ensuring **maximum speed** for known URLs while maintaining **accuracy** for unknown threats.
 
@@ -183,14 +166,14 @@ Built on **Redis Pub/Sub** for real-time threat intelligence sharing:
          │
          ▼
     ┌─────────┐
-    │ Node A  │───── Publishes Threat Hash ────> ┌────────┐
+    │ Node A  │───── Publishes Threat Hash ────>┌────────┐
     │(Detects)│                                  │ Redis  │
     └─────────┘                                  │ Broker │
                                                  └────────┘
                                                       │
                                                       │
-                    Step 2: Redis Broadcasts          │
-                         to All Nodes                 │
+                    Step 2: Redis Broadcasts         │
+                         to All Nodes                │
                                                       │
          ┌────────────────────────────────────────────┤
          │                                            │
@@ -235,7 +218,7 @@ Built on **Redis Pub/Sub** for real-time threat intelligence sharing:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              ECHOLOCK ECOSYSTEM                             │
+│                              ECHOLOCK ECOSYSTEM                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 
                             ┌──────────────┐
@@ -755,9 +738,7 @@ Distributed under the **MIT License**. See `LICENSE` file for more information.
 
 ## Contact 
 
-
 **Gmail:** [omojiremurewa@gmail.com](mailto:omojiremurewa@gmail.com)
-
 
 ---
 
