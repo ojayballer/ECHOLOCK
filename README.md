@@ -175,24 +175,35 @@ Built on **Redis Pub/Sub** for real-time threat intelligence sharing:
 <div align="center">
 
 ```
-    NODE A              REDIS              NODE B
- (Publisher)          (Broker)         (Subscriber)
-      │                  │                  │
-      │  Detects Threat  │                  │
-      ├─────────────────>│                  │
-      │                  │                  │
-      │   Publishes Hash │   Subscribes    │
-      │                  │<─────────────────┤
-      │                  │                  │
-      │                  │  Propagates      │
-      │                  ├─────────────────>│
-      │                  │                  │
-      │                  │   Updates DB     │
-      │                  │                  ├──┐
-      │                  │                  │  │
-      │                  │                  │<─┘
-      
-   ✓ Attack on Node A → All Nodes Immune
+┌─────────────────────────────────────────────────────────┐
+│              FEDERATION WORKFLOW                        │
+└─────────────────────────────────────────────────────────┘
+
+    Step 1: Node A Detects Phishing URL
+         │
+         ▼
+    ┌─────────┐
+    │ Node A  │───── Publishes Threat Hash ────> ┌────────┐
+    │(Detects)│                                  │ Redis  │
+    └─────────┘                                  │ Broker │
+                                                 └────────┘
+                                                      │
+                                                      │
+                    Step 2: Redis Broadcasts          │
+                         to All Nodes                 │
+                                                      │
+         ┌────────────────────────────────────────────┤
+         │                                            │
+         ▼                                            ▼
+    ┌─────────┐                                  ┌─────────┐
+    │ Node B  │                                  │ Node C  │
+    │(Receives│                                  │(Receives│
+    │ Update) │                                  │ Update) │
+    └─────────┘                                  └─────────┘
+         │                                            │
+         └──> Updates Local Blocklist <───────────────┘
+
+    Result: All nodes now immune to this threat
 ```
 
 </div>
@@ -224,7 +235,7 @@ Built on **Redis Pub/Sub** for real-time threat intelligence sharing:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              ECHOLOCK ECOSYSTEM                              │
+│                              ECHOLOCK ECOSYSTEM                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 
                             ┌──────────────┐
@@ -248,26 +259,26 @@ Built on **Redis Pub/Sub** for real-time threat intelligence sharing:
             ╔═══════════════════════════════════════════════════╗
             ║            BACKEND API (Flask/Python)             ║
             ║                                                   ║
-            ║  ┌─────────────┐  ┌─────────────┐               ║
-            ║  │ Allowlist   │→ │ Blocklist   │               ║
-            ║  │   Check     │  │   Check     │               ║
-            ║  └─────────────┘  └─────────────┘               ║
+            ║  ┌─────────────┐  ┌─────────────┐                 ║
+            ║  │ Allowlist   │→ │ Blocklist   │                 ║
+            ║  │   Check     │  │   Check     │                 ║
+            ║  └─────────────┘  └─────────────┘                 ║
             ║                          │                        ║
             ║                          ▼                        ║
-            ║                  ┌─────────────┐                 ║
-            ║                  │  Federated  │                 ║
-            ║                  │  Blocklist  │                 ║
-            ║                  └─────────────┘                 ║
+            ║                  ┌─────────────┐                  ║
+            ║                  │  Federated  │                  ║
+            ║                  │  Blocklist  │                  ║
+            ║                  └─────────────┘                  ║
             ║                          │                        ║
             ║                          ▼                        ║
-            ║                  ┌─────────────┐                 ║
-            ║                  │ AI Analysis │                 ║
-            ║                  │  (LinearSVC)│                 ║
-            ║                  └─────────────┘                 ║
+            ║                  ┌─────────────┐                  ║
+            ║                  │ AI Analysis │                  ║
+            ║                  │  (LinearSVC)│                  ║
+            ║                  └─────────────┘                  ║
             ║                          │                        ║
             ║                   If Phishing                     ║
             ║                          │                        ║
-            ╚══════════════════════════┼════════════════════════╝
+            ╚══════════════════════════ ════════════════════════╝
                                        │
                               Publish Hash
                                        │
@@ -742,15 +753,11 @@ Distributed under the **MIT License**. See `LICENSE` file for more information.
 
 <div align="center">
 
-## Contact & Links
+## Contact 
 
-**Author:** [ojayballer](https://github.com/ojayballer)
 
 **Gmail:** [omojiremurewa@gmail.com](mailto:omojiremurewa@gmail.com)
 
-**Project Repository:** [github.com/ojayballer/ECHOLOCK](https://github.com/ojayballer/ECHOLOCK)
-
-**Live Deployment:** [echolockai.up.railway.app](https://echolockai.up.railway.app/)
 
 ---
 
