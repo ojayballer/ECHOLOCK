@@ -19,12 +19,27 @@
 
 <div align="center">
 
+### Detection Performance
+
 | Metric | Value |
 |:------:|:-----:|
 | **Detection Accuracy** | 91% |
-| **Average Response Time** | < 2ms |
-| **Threat Propagation Speed** | Milliseconds |
 | **Memory Footprint** | 45MB |
+
+### Response Times by Layer
+
+| Validation Layer | Response Time |
+|:----------------:|:-------------:|
+| **Static Lists (Allow/Block)** | < 50ms |
+| **Federated Blocklist** | < 200ms |
+| **AI Analysis (Full Pipeline)** | 2-4 seconds |
+
+### Federation Speed
+
+| Metric | Value |
+|:------:|:-----:|
+| **Threat Propagation** | < 5 seconds |
+| **Network Synchronization** | Real-time |
 
 </div>
 
@@ -45,6 +60,22 @@ When one node in the ECHOLOCK network detects a new, high-confidence threat, tha
 This is achieved through a **hybrid validation system** that combines multiple layers of defense for maximum speed and accuracy.
 
 > **Built for the Cyber AI Hackathon 2025**
+
+---
+
+## Why ECHOLOCK?
+
+<div align="center">
+
+| Feature | Traditional Scanners | ECHOLOCK |
+|---------|---------------------|----------|
+| **Threat Sharing** | Isolated | Network-Wide |
+| **Detection Speed** | Reactive | Proactive |
+| **Zero-Day Response** | Hours/Days | Seconds |
+| **Scalability** | Single-Node | Distributed |
+| **Intelligence** | Static Lists Only | AI + Federation |
+
+</div>
 
 ---
 
@@ -72,9 +103,8 @@ Real-time verdict with confidence scoring
 </table>
 
 <div align="center">
-
-**Demo Video:** [Watch on YouTube](https://youtu.be/kLEeSNlmpAI?si=MA_OgekvEUS16RUk)
-
+    
+[![Watch Demo](https://img.shields.io/badge/▶️_Watch-Demo_Video-red?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/kLEeSNlmpAI?si=MA_OgekvEUS16RUk)
 
 </div>
 
@@ -87,6 +117,7 @@ Real-time verdict with confidence scoring
 
 - [Performance Metrics](#performance-metrics)
 - [Overview](#overview)
+- [Why ECHOLOCK?](#why-echolock)
 - [Application Preview](#application-preview)
 - [Key Features](#key-features)
 - [Architecture](#architecture)
@@ -108,6 +139,9 @@ Real-time verdict with confidence scoring
 ### Multi-Layer Hybrid Validation
 
 ECHOLOCK employs a sophisticated **fast-to-slow** validation pipeline:
+
+<div align="center">
+
 ```
 ╔═══════════════════════════════════════╗
 ║  VALIDATION PIPELINE                  ║
@@ -128,6 +162,8 @@ ECHOLOCK employs a sophisticated **fast-to-slow** validation pipeline:
 ╚═══════════════════════════════════════╝
 ```
 
+</div>
+
 Each layer acts as a checkpoint, ensuring **maximum speed** for known URLs while maintaining **accuracy** for unknown threats.
 
 ---
@@ -135,6 +171,9 @@ Each layer acts as a checkpoint, ensuring **maximum speed** for known URLs while
 ### Federation Architecture
 
 Built on **Redis Pub/Sub** for real-time threat intelligence sharing:
+
+<div align="center">
+
 ```
     NODE A              REDIS              NODE B
  (Publisher)          (Broker)         (Subscriber)
@@ -156,11 +195,13 @@ Built on **Redis Pub/Sub** for real-time threat intelligence sharing:
    ✓ Attack on Node A → All Nodes Immune
 ```
 
+</div>
+
 ---
 
 ### Instant Immunity
 
-- **Threat Propagation:** < 100ms
+- **Threat Propagation:** < 5 seconds
 - **Network-Wide Protection:** Simultaneous
 - **Zero-Day Response:** Real-time
 
@@ -178,6 +219,9 @@ Built on **Redis Pub/Sub** for real-time threat intelligence sharing:
 ## Architecture
 
 ### System Flow Diagram
+
+<div align="center">
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                              ECHOLOCK ECOSYSTEM                              │
@@ -245,6 +289,8 @@ Built on **Redis Pub/Sub** for real-time threat intelligence sharing:
             ║  • Ensures All Nodes Stay Synchronized            ║
             ╚═══════════════════════════════════════════════════╝
 ```
+
+</div>
 
 ### Component Responsibilities
 
