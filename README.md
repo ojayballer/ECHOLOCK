@@ -73,7 +73,8 @@ Real-time verdict with confidence scoring
 
 <div align="center">
 
-**Demo Video:** [Coming Soon]
+**Demo Video:** [Watch on YouTube](https://youtu.be/kLEeSNlmpAI?si=MA_OgekvEUS16RUk)
+
 
 </div>
 
