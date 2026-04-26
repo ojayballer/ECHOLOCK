@@ -4,10 +4,6 @@
 
 ### A hybrid, federated AI defense system for real-time, collective phishing detection
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge)](https://github.com/ojayballer/ECHOLOCK)
-[![Status](https://img.shields.io/badge/status-deployed-blue?style=for-the-badge)](https://echolockai.up.railway.app/)
-[![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](https://github.com/ojayballer/ECHOLOCK/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0-orange?style=for-the-badge)](https://github.com/ojayballer/ECHOLOCK)
 
 **[View Live Demo](https://echolockai.up.railway.app/)** • **[Report Bug](https://github.com/ojayballer/ECHOLOCK/issues)** • **[Request Feature](https://github.com/ojayballer/ECHOLOCK/issues)**
 
@@ -728,7 +724,6 @@ git push origin feature/AmazingFeature
 
 Distributed under the **MIT License**. See `LICENSE` file for more information.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 </div>
 
@@ -748,8 +743,5 @@ If you find ECHOLOCK useful, please consider giving it a star on GitHub!
 
 ---
 
-![Wave](https://capsule-render.vercel.app/api?type=waving&color=gradient&height=100&section=footer)
 
-**Built with passion for the Cyber AI Hackathon 2025**
 
-</div>
