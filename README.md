@@ -1,392 +1,151 @@
-<div align="center">
-
 # ECHOLOCK
 
-### A hybrid, federated AI defense system for real-time, collective phishing detection
+A federated phishing detection system. When one node catches a threat, every node on the network gets immune to it in seconds.
 
+[Report Bug](https://github.com/ojayballer/ECHOLOCK/issues) · [Request Feature](https://github.com/ojayballer/ECHOLOCK/issues)
 
-**[View Live Demo](https://echolockai.up.railway.app/)** • **[Report Bug](https://github.com/ojayballer/ECHOLOCK/issues)** • **[Request Feature](https://github.com/ojayballer/ECHOLOCK/issues)**
-
-</div>
-
----
-
-## Performance Metrics
-
-<div align="center">
-
-### Detection Performance
-
-| Metric | Value |
-|:------:|:-----:|
-| **Detection Accuracy** | 91% |
-| **Memory Footprint** | 45MB |
-
-### Response Times by Layer
-
-| Validation Layer | Response Time |
-|:----------------:|:-------------:|
-| **Static Lists (Allow/Block)** | < 50ms |
-| **Federated Blocklist** | < 200ms |
-| **AI Analysis (Full Pipeline)** | 2-4 seconds |
-
-### Federation Speed
-
-| Metric | Value |
-|:------:|:-----:|
-| **Threat Propagation** | < 5 seconds |
-| **Network Synchronization** | Real-time |
-
-</div>
+> Built for the Cyber AI Hackathon 2025
 
 ---
 
-## Overview
+## What this is
 
-ECHOLOCK is a cybersecurity application  designed to combat the growing sophistication of phishing attacks. Unlike traditional, isolated scanners, ECHOLOCK operates as a **collective defense network**. It solves the problem of reactive threat intelligence by implementing a federated architecture.
+Most phishing scanners work alone. One organization finds a malicious URL, flags it internally, and moves on. Meanwhile the same URL is hitting every other target on the internet and nobody else knows about it yet. That gap between discovery and shared knowledge is where attackers live.
 
-### The Problem
+ECHOLOCK fixes that. It runs a hybrid validation pipeline where URLs get checked against static lists first, then a federated blocklist shared across all nodes, and finally an ML classifier for anything unknown. When the classifier catches something new with high confidence, it publishes a hash of that threat to a Redis channel. Every other node subscribed to the channel picks it up in milliseconds and adds it to their local blocklist. So a threat that hits Node A at 2:00 PM is already blocked on Node B, C, and D by 2:00:01 PM.
 
-Traditional phishing detection systems operate in isolation. When one organization discovers a new threat, that knowledge doesn't immediately benefit others. This creates a window of vulnerability where attackers can reuse the same techniques across multiple targets.
+The validation pipeline is designed fast-to-slow. Known good URLs get cleared instantly from the allowlist. Known bad URLs get blocked instantly from the blocklist. The federated layer catches recently discovered threats. The ML model only runs on URLs that made it through everything else. This keeps response times low for the majority of requests while still catching novel attacks.
 
-### The Solution
-
-When one node in the ECHOLOCK network detects a new, high-confidence threat, that threat's fingerprint (IOC) is instantly published to a central federation server powered by Redis. All other nodes subscribed to the network receive this update in **milliseconds**, granting them **immediate immunity** to a threat they have never even seen.
-
-This is achieved through a **hybrid validation system** that combines multiple layers of defense for maximum speed and accuracy.
-
-> **Built for the Cyber AI Hackathon 2025**
-
----
-
-## Why ECHOLOCK?
-
-<div align="center">
-
-| Feature | Traditional Scanners | ECHOLOCK |
-|---------|---------------------|----------|
-| **Threat Sharing** | Isolated | Network-Wide |
-| **Detection Speed** | Reactive | Proactive |
-| **Zero-Day Response** | Hours/Days | Seconds |
-| **Scalability** | Single-Node | Distributed |
-| **Intelligence** | Static Lists Only | AI + Federation |
-
-</div>
-
----
-
-## Application Preview
+## How it looks
 
 <table>
 <tr>
 <td width="50%">
 
-### Main Interface
-<img src="./examples/normal_verdict.png" alt="ECHOLOCK Main Interface" width="100%">
+**Main Interface**
 
-Clean, intuitive interface for URL submission and analysis
+<img src="./examples/normal_verdict.png" alt="ECHOLOCK Main Interface" width="100%">
 
 </td>
 <td width="50%">
 
-### Threat Detection
-<img src="./examples/phishing_verdict.png" alt="Phishing Detection Result" width="100%">
+**Phishing Detected**
 
-Real-time verdict with confidence scoring
+<img src="./examples/phishing_verdict.png" alt="Phishing Detection Result" width="100%">
 
 </td>
 </tr>
 </table>
 
-<div align="center">
-    
 [![Watch Demo](https://img.shields.io/badge/▶️_Watch-Demo_Video-red?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/kLEeSNlmpAI?si=MA_OgekvEUS16RUk)
 
-</div>
+---
+
+## Performance
+
+| What | Speed |
+|------|-------|
+| Detection accuracy | 91% |
+| Memory footprint | 45MB |
+| Allowlist/Blocklist checks | < 50ms |
+| Federated blocklist lookup | < 200ms |
+| Full AI pipeline | 2 to 4 seconds |
+| Threat propagation across network | < 5 seconds |
 
 ---
 
-## Table of Contents
+## How it works
 
-<details open>
-<summary><b>Click to expand/collapse</b></summary>
+There are four layers, checked in order.
 
-- [Performance Metrics](#performance-metrics)
-- [Overview](#overview)
-- [Why ECHOLOCK?](#why-echolock)
-- [Application Preview](#application-preview)
-- [Key Features](#key-features)
-- [Architecture](#architecture)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Quick Start](#quick-start)
-- [Usage](#usage)
-- [Model Selection](#model-selection)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
+**Static Allowlist.** Trusted domains get approved instantly. No computation needed.
 
-</details>
+**Static Blocklist.** Known malicious domains get blocked instantly. Same idea.
 
----
+**Federated Blocklist.** This is the network layer. Every time any node on the network catches a new threat, it publishes a hash to Redis. All other nodes subscribe to that channel and add the hash to their local blocklists. So this layer catches threats that were discovered by other nodes, even if this specific node has never seen them before.
 
-## Key Features
+**AI Analysis.** If a URL makes it through all three previous layers, it gets classified by a LinearSVC model. If the model flags it as phishing with high confidence, two things happen. The user gets a phishing verdict, and the URL hash gets published to the federation channel so every other node learns about it too.
 
-### Multi-Layer Hybrid Validation
-
-ECHOLOCK employs a sophisticated **fast-to-slow** validation pipeline:
-
-**① Static Allowlist** → Instant approval for trusted domains  
-**② Static Blocklist** → Instant block for known malicious domains  
-**③ Federated Blocklist** → Check network-shared threat intelligence  
-**④ AI Analysis (LinearSVC)** → Machine learning classification for unknown URLs
-
-Each layer acts as a checkpoint, ensuring **maximum speed** for known URLs while maintaining **accuracy** for unknown threats.
-
-Each layer acts as a checkpoint, ensuring **maximum speed** for known URLs while maintaining **accuracy** for unknown threats.
-
----
-
-### Federation Architecture
-
-Built on **Redis Pub/Sub** for real-time threat intelligence sharing:
-
-<div align="center">
-
-```
-┌─────────────────────────────────────────────────────────┐
-│              FEDERATION WORKFLOW                        │
-└─────────────────────────────────────────────────────────┘
-
-    Step 1: Node A Detects Phishing URL
-         │
-         ▼
-    ┌─────────┐
-    │ Node A  │───── Publishes Threat Hash ────>┌────────┐
-    │(Detects)│                                  │ Redis  │
-    └─────────┘                                  │ Broker │
-                                                 └────────┘
-                                                      │
-                                                      │
-                    Step 2: Redis Broadcasts         │
-                         to All Nodes                │
-                                                      │
-         ┌────────────────────────────────────────────┤
-         │                                            │
-         ▼                                            ▼
-    ┌─────────┐                                  ┌─────────┐
-    │ Node B  │                                  │ Node C  │
-    │(Receives│                                  │(Receives│
-    │ Update) │                                  │ Update) │
-    └─────────┘                                  └─────────┘
-         │                                            │
-         └──> Updates Local Blocklist <───────────────┘
-
-    Result: All nodes now immune to this threat
-```
-
-</div>
-
----
-
-### Instant Immunity
-
-- **Threat Propagation:** < 5 seconds
-- **Network-Wide Protection:** Simultaneous
-- **Zero-Day Response:** Real-time
-
----
-
-### Decoupled Architecture
-
-- **Frontend** — TypeScript/React interface
-- **Backend API** — Flask orchestration layer
-- **Federation Worker** — Python subscriber
-- **Redis Cloud** — Pub/Sub broker + Database
+Each layer is a checkpoint. The system only moves to the next layer if the current one has no opinion. This means the vast majority of requests never even reach the ML model.
 
 ---
 
 ## Architecture
 
-### System Flow Diagram
+The system has four components that run independently.
 
-<div align="center">
+**Frontend** is a React/TypeScript app built with Vite. It handles the UI, submits URLs to the backend, and displays the verdict with a confidence score.
 
+**Backend API** is a Flask server. This is where the validation pipeline lives. It checks each layer in order, runs the model when needed, and publishes new threats to Redis.
+
+**Federation Worker** is a Python daemon that subscribes to the Redis channel. When it receives a new threat hash, it updates the local federated blocklist. This runs as a separate process alongside the backend.
+
+**Redis Cloud** acts as both the pub/sub message broker and persistent storage for the federation channel.
+
+```mermaid
+flowchart TD
+    A(["URL submitted"]) --> B["Allowlist"]
+    B -- trusted --> V1(["Safe"])
+    B -- not listed --> C["Blocklist"]
+    C -- blocked --> V2(["Phishing"])
+    C -- not listed --> D["Federated Blocklist"]
+    D -- matched --> V3(["Phishing"])
+    D -- not listed --> E["LinearSVC Model"]
+    E -- normal --> V4(["Safe"])
+    E -- phishing --> V5(["Phishing"])
+    V5 -. publish hash .-> R[("Redis")]
+    R -. broadcast .-> D
+
+    classDef safe fill:#2ea043,stroke:#2ea043,color:#fff
+    classDef danger fill:#da3633,stroke:#da3633,color:#fff
+    classDef layer fill:#388bfd,stroke:#388bfd,color:#fff
+    classDef fed fill:#a371f7,stroke:#a371f7,color:#fff
+    classDef input fill:#30363d,stroke:#8b949e,color:#e6edf3
+
+    class V1,V4 safe
+    class V2,V3,V5 danger
+    class B,C,E layer
+    class D fed
+    class R fed
+    class A input
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              ECHOLOCK ECOSYSTEM                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-                            ┌──────────────┐
-                            │    USER      │
-                            │   BROWSER    │
-                            └───────┬──────┘
-                                    │
-                            HTTPS Request
-                                    │
-                                    ▼
-            ╔═══════════════════════════════════════════════════╗
-            ║           FRONTEND (React/TypeScript)             ║
-            ║  • User Interface                                 ║
-            ║  • Real-time Visualization                        ║
-            ║  • Confidence Scoring Display                     ║
-            ╚═══════════════════════════════════════════════════╝
-                                    │
-                            POST /api/check
-                                    │
-                                    ▼
-            ╔═══════════════════════════════════════════════════╗
-            ║            BACKEND API (Flask/Python)             ║
-            ║                                                   ║
-            ║  ┌─────────────┐  ┌─────────────┐                 ║
-            ║  │ Allowlist   │→ │ Blocklist   │                 ║
-            ║  │   Check     │  │   Check     │                 ║
-            ║  └─────────────┘  └─────────────┘                 ║
-            ║                          │                        ║
-            ║                          ▼                        ║
-            ║                  ┌─────────────┐                  ║
-            ║                  │  Federated  │                  ║
-            ║                  │  Blocklist  │                  ║
-            ║                  └─────────────┘                  ║
-            ║                          │                        ║
-            ║                          ▼                        ║
-            ║                  ┌─────────────┐                  ║
-            ║                  │ AI Analysis │                  ║
-            ║                  │  (LinearSVC)│                  ║
-            ║                  └─────────────┘                  ║
-            ║                          │                        ║
-            ║                   If Phishing                     ║
-            ║                          │                        ║
-            ╚══════════════════════════ ════════════════════════╝
-                                       │
-                              Publish Hash
-                                       │
-                                       ▼
-            ╔═══════════════════════════════════════════════════╗
-            ║         REDIS CLOUD (Pub/Sub + Database)          ║
-            ║  • Message Broker                                 ║
-            ║  • Persistent Storage                             ║
-            ║  • Federation Channel                             ║
-            ╚═══════════════════════════════════════════════════╝
-                                       │
-                                  Subscribe
-                                       │
-                                       ▼
-            ╔═══════════════════════════════════════════════════╗
-            ║        FEDERATION WORKER (Python Daemon)          ║
-            ║  • Listens to Redis Channel                       ║
-            ║  • Updates Federated Blocklist                    ║
-            ║  • Ensures All Nodes Stay Synchronized            ║
-            ╚═══════════════════════════════════════════════════╝
-```
-
-</div>
-
-### Component Responsibilities
-
-<table>
-<tr>
-<th>Component</th>
-<th>Primary Role</th>
-<th>Technology</th>
-</tr>
-<tr>
-<td><b>Frontend</b></td>
-<td>User interface and result visualization</td>
-<td>TypeScript, React, Vite</td>
-</tr>
-<tr>
-<td><b>Backend API</b></td>
-<td>Orchestrates validation logic, publishes threats</td>
-<td>Python, Flask</td>
-</tr>
-<tr>
-<td><b>Federation Worker</b></td>
-<td>Subscribes to threats, updates blocklist</td>
-<td>Python, Redis Client</td>
-</tr>
-<tr>
-<td><b>Redis Cloud</b></td>
-<td>Message broker and persistent storage</td>
-<td>Redis Pub/Sub</td>
-</tr>
-<tr>
-<td><b>ML Model</b></td>
-<td>Classifies unknown URLs</td>
-<td>Scikit-learn (LinearSVC)</td>
-</tr>
-</table>
 
 ---
 
-## Tech Stack
+## Tech stack
 
-<div align="center">
-
-### Backend Technologies
-
-<p>
-  <img src="https://skillicons.dev/icons?i=python,flask" alt="Backend Stack" height="50"/>
-</p>
-
-![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Flask](https://img.shields.io/badge/Flask-2.0+-000000?style=for-the-badge&logo=flask&logoColor=white)
-
-### Frontend Technologies
-
-<p>
-  <img src="https://skillicons.dev/icons?i=typescript,react,vite" alt="Frontend Stack" height="50"/>
-</p>
-
-![TypeScript](https://img.shields.io/badge/TypeScript-4.9+-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![React](https://img.shields.io/badge/React-18+-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-
-### Machine Learning & Data Processing
-
-![Scikit-learn](https://img.shields.io/badge/Scikit--learn-1.3+-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
-![Pandas](https://img.shields.io/badge/Pandas-2.0+-150458?style=for-the-badge&logo=pandas&logoColor=white)
-![NumPy](https://img.shields.io/badge/NumPy-1.24+-013243?style=for-the-badge&logo=numpy&logoColor=white)
-
-### Infrastructure
-
-<p>
-  <img src="https://skillicons.dev/icons?i=redis" alt="Redis" height="50"/>
-</p>
-
-![Redis](https://img.shields.io/badge/Redis-7.0+-DC382D?style=for-the-badge&logo=redis&logoColor=white)
-
-### Deployment
-
-![Railway](https://img.shields.io/badge/Railway-Deployed-0B0D0E?style=for-the-badge&logo=railway&logoColor=white)
-
-</div>
+| Layer | Technologies |
+|-------|-------------|
+| Backend | Python, Flask, Scikit-learn, Pandas, NumPy |
+| Frontend | TypeScript, React, Vite |
+| Infrastructure | Redis Cloud |
+| Deployment | Railway |
 
 ---
 
-## Project Structure
+## Project structure
+
 ```
 ECHOLOCK/
-│
 ├── BACKEND_ECHOLOCK/
-│   ├── app.py                    # Flask API (Publisher)
+│   ├── app.py                    # Flask API, publisher
 │   ├── federation.py             # Threat publishing logic
 │   ├── federation_worker.py      # Redis subscriber daemon
-│   ├── utils.py                  # Model loading & prediction
+│   ├── utils.py                  # Model loading and prediction
 │   ├── ECHOLOCK.pkl              # Pre-trained LinearSVC model
-│   ├── requirements.txt          # Python dependencies
-│   ├── Procfile                  # Railway deployment config
-│   └── .env                      # Environment variables
+│   ├── requirements.txt
+│   ├── Procfile                  # Railway config
+│   └── .env
 │
 ├── FRONTEND/
 │   ├── src/
-│   │   ├── components/           # React components
-│   │   ├── pages/                # Application pages
-│   │   ├── utils/                # Helper functions
-│   │   └── App.tsx               # Main application
-│   ├── public/
-│   ├── package.json              # Node dependencies
-│   ├── vite.config.ts            # Vite configuration
-│   └── .env                      # Environment variables
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── utils/
+│   │   └── App.tsx
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── .env
 │
 ├── MODEL/NOTEBOOK/
 │   └── ECHOLOCK.ipynb            # RandomForest experimentation
@@ -402,51 +161,20 @@ ECHOLOCK/
 
 ---
 
-## Quick Start
+## Getting started
 
-### Prerequisites
+You need Python 3.8+, Node.js 14+, and a Redis Cloud account.
 
-<table>
-<tr>
-<td align="center" width="33%">
+### Clone and set up the backend
 
-**Python**
-
-![Python](https://img.shields.io/badge/3.8+-Required-blue?logo=python&logoColor=white)
-
-</td>
-<td align="center" width="33%">
-
-**Node.js**
-
-![Node.js](https://img.shields.io/badge/14+-Required-green?logo=node.js&logoColor=white)
-
-</td>
-<td align="center" width="33%">
-
-**Redis**
-
-![Redis](https://img.shields.io/badge/Cloud-Account-red?logo=redis&logoColor=white)
-
-</td>
-</tr>
-</table>
-
-### Installation
-
-#### Step 1: Clone Repository
 ```bash
 git clone https://github.com/ojayballer/ECHOLOCK.git
-cd ECHOLOCK
-```
-
-#### Step 2: Backend Configuration
-```bash
-cd BACKEND_ECHOLOCK
+cd ECHOLOCK/BACKEND_ECHOLOCK
 pip install -r requirements.txt
 ```
 
-Create `.env` file:
+Create a `.env` file in `BACKEND_ECHOLOCK/`:
+
 ```env
 REDIS_HOST=your-redis-host.com
 REDIS_PORT=12345
@@ -454,115 +182,59 @@ REDIS_PASS=your-password
 REDIS_CHANNEL=echolock_federation
 ```
 
-#### Step 3: Frontend Configuration
+### Set up the frontend
+
 ```bash
 cd ../FRONTEND
 npm install
 ```
 
-Create `.env` file:
+Create a `.env` file in `FRONTEND/`:
+
 ```env
 VITE_API_URL=http://127.0.0.1:5000
 ```
 
----
+### Run it
 
-## Usage
+You need three terminals.
 
-### Starting the Application
-
-<table>
-<tr>
-<td width="33%" align="center">
-
-**Terminal 1**
-
-### Backend API
 ```bash
+# Terminal 1: backend API
 cd BACKEND_ECHOLOCK
 python app.py
-```
+# runs on http://127.0.0.1:5000
 
-**Status:** 
-```
-✓ Running on 
-  http://127.0.0.1:5000
-```
-
-</td>
-<td width="33%" align="center">
-
-**Terminal 2**
-
-### Federation Worker
-```bash
+# Terminal 2: federation worker
 cd BACKEND_ECHOLOCK
 python federation_worker.py
-```
+# subscribes to Redis channel, listens for threats
 
-**Status:**
-```
-✓ Subscribed to channel
-  Listening for threats...
-```
-
-</td>
-<td width="33%" align="center">
-
-**Terminal 3**
-
-### Frontend
-```bash
+# Terminal 3: frontend
 cd FRONTEND
 npm run dev
+# runs on http://localhost:5173
 ```
 
-**Status:**
-```
-✓ Local server
-  http://localhost:5173
-```
-
-</td>
-</tr>
-</table>
-
-<div align="center">
-
-**Navigate to `http://localhost:5173` to use ECHOLOCK**
-
-</div>
+Open `http://localhost:5173` and start scanning URLs.
 
 ---
 
-### API Reference
+## API
 
-#### `POST /api/check`
+### POST /api/check
 
-Analyzes a submitted URL and returns a comprehensive verdict.
+Submit a URL for analysis.
 
-<table>
-<tr>
-<td width="50%">
-
-**Request Example**
+**Request:**
 ```json
-POST /api/check
-Content-Type: application/json
-
 {
   "url": "https://example.com"
 }
 ```
 
-</td>
-<td width="50%">
-
-**Response Example**
+**Response:**
 ```json
-HTTP/1.1 200 OK
-Content-Type: application/json
-
 {
   "url": "https://example.com",
   "verdict": "normal",
@@ -570,178 +242,61 @@ Content-Type: application/json
 }
 ```
 
-</td>
-</tr>
-</table>
-
-#### Response Fields
-
-| Field | Type | Description | Possible Values |
-|-------|------|-------------|-----------------|
-| `url` | `string` | The analyzed URL | Any valid URL |
-| `verdict` | `string` | Classification result | `normal`, `phishing` |
-| `confidence` | `float` | Model certainty score | 0.0 - 100.0 |
-
-> **Note:** A confidence score of `100.0` typically indicates the URL was caught by a static list rather than ML analysis.
+The `verdict` field is either `normal` or `phishing`. The `confidence` score ranges from 0 to 100. A confidence of exactly 100.0 usually means the URL was caught by a static list rather than the ML model.
 
 ---
 
-## Model Selection
+## Why LinearSVC
 
-### Experimentation Process
+The `MODEL/NOTEBOOK/ECHOLOCK.ipynb` notebook shows my experimentation with a RandomForest classifier that hit 92% accuracy on validation. But I also tried LinearSVC, Logistic Regression, Gradient Boosting, and an LSTM with character-level tokenization through separate training scripts.
 
-The `MODEL/NOTEBOOK/ECHOLOCK.ipynb` notebook documents part of my experimentation process, specifically my work with a **RandomForest** classifier that achieved **92% accuracy** on the validation set.
+I went with LinearSVC for production because it gives the best tradeoff between inference speed and accuracy. RandomForest was slightly more accurate but too slow for a real-time API. The LSTM kept overfitting despite regularization. LinearSVC runs fast enough to handle high request volumes without dropping detection quality, which is what matters for something that needs to respond in real time.
 
-However, my model selection process extended beyond what is shown in the notebook. I experimented with multiple algorithms including **LinearSVC**, **Logistic Regression**, **Gradient Boosting**, and even explored **LSTM networks** with character-level tokenization for sequence-based feature learning through separate training scripts.
-
-### Why LinearSVC?
-
-After extensive benchmarking, I chose **LinearSVC** for production deployment because it provides the optimal balance of **high inference speed** and **strong predictive accuracy**, which is critical for a low-latency, real-time API. 
-
-While RandomForest demonstrated slightly higher accuracy and LSTMs showed promise in capturing sequential patterns, they came with significant trade-offs. The LSTM approach suffered from overfitting issues despite regularization attempts, and RandomForest's inference time was too slow for real-time requirements. LinearSVC's efficient linear decision boundary computation allows ECHOLOCK to handle high request volumes without sacrificing detection performance, making it the clear choice for a production environment.
-
-### Repository Contents
-
-I chose to include only the RandomForest experimentation notebook in the repository to keep the project structure clean and focused. It effectively illustrates my approach to feature engineering and baseline model development. The additional experimentation notebooks, including LSTM implementations and hyperparameter tuning scripts, were development artifacts that I opted not to include in the final repository.
+I only included the RandomForest notebook in the repo to keep things clean. It shows the feature engineering and baseline work well enough. The other training scripts were development artifacts.
 
 ---
 
 ## Roadmap
 
-<table>
-<tr>
-<td width="50%">
+**Intelligence**
+- Global threat feed dashboard with real-time visualization and geographic mapping
+- Threat pattern recognition and predictive modeling
+- Public API for threat data
 
-### Phase 1: Intelligence Enhancement
+**Client integration**
+- Browser extension for Chrome and Firefox with real-time scanning
+- Mobile app with SMS/email link scanning and QR code analysis
 
-- [ ] **Global Threat Feed Dashboard**
-  - Real-time threat visualization
-  - Geographic threat mapping
-  - Historical trend analysis
-  - Public API for threat data
+**Enterprise**
+- Router-level and network-level deployment
+- RESTful public API with rate limiting, auth, webhooks, and batch processing
 
-- [ ] **Advanced Analytics**
-  - Threat pattern recognition
-  - Attack vector analysis
-  - Predictive threat modeling
-
-</td>
-<td width="50%">
-
-### Phase 2: Client Integration
-
-- [ ] **Browser Extension**
-  - Chrome/Firefox support
-  - Real-time URL scanning
-  - Passive background monitoring
-  - Low resource footprint
-
-- [ ] **Mobile Application**
-  - iOS and Android support
-  - SMS/Email link scanning
-  - QR code analysis
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-### Phase 3: Enterprise Features
-
-- [ ] **Router Integration**
-  - Network-level deployment
-  - ISP partnership opportunities
-  - Corporate firewall integration
-  - Zero-touch configuration
-
-- [ ] **API Gateway**
-  - RESTful public API
-  - Rate limiting and authentication
-  - Webhook notifications
-  - Batch processing support
-
-</td>
-<td width="50%">
-
-### Phase 4: AI Evolution
-
-- [ ] **Deep Learning Models**
-  - Retrain a new LSTM network for sequential analysis
-  - Transformer-based classification
-  - Multi-modal threat detection
-  - Adversarial training
-
-- [ ] **Decentralized Federation**
-  - Blockchain-based verification
-  - P2P threat propagation
-  - Eliminate single point of failure
-  - Trust scoring system
-
-</td>
-</tr>
-</table>
+**AI evolution**
+- Retrain an LSTM for sequential analysis
+- Transformer-based classification
+- Decentralized federation with P2P threat propagation
 
 ---
 
 ## Contributing
 
-**Contributions are what make the open-source community an amazing place to learn and create.**
-
-### How to Contribute
 ```bash
-# 1. Fork the Project
-# Click the 'Fork' button at the top right of this page
-
-# 2. Clone your fork
+# Fork the repo, then:
 git clone https://github.com/YOUR_USERNAME/ECHOLOCK.git
-
-# 3. Create a feature branch
-git checkout -b feature/AmazingFeature
-
-# 4. Make your changes and commit
-git commit -m 'Add some AmazingFeature'
-
-# 5. Push to your branch
-git push origin feature/AmazingFeature
-
-# 6. Open a Pull Request
-# Go to the original repo and click 'New Pull Request'
+git checkout -b feature/your-feature
+git commit -m 'Add your feature'
+git push origin feature/your-feature
+# Open a pull request
 ```
-
-### Contribution Guidelines
-
-- Write clear, descriptive commit messages
-- Follow the existing code style
-- Add tests for new features
-- Update documentation as needed
-- Be respectful and constructive in discussions
 
 ---
 
 ## License
 
-<div align="center">
-
-Distributed under the **MIT License**. See `LICENSE` file for more information.
-
-
-</div>
+MIT. See `LICENSE` for details.
 
 ---
 
-<div align="center">
+**Contact:** [omojiremurewa@gmail.com](mailto:omojiremurewa@gmail.com)
 
-## Contact 
-
-**Gmail:** [omojiremurewa@gmail.com](mailto:omojiremurewa@gmail.com)
-
----
-
-### Support This Project
-
-If you find ECHOLOCK useful, please consider giving it a star on GitHub!
-
----
-
-
-
+If you find this useful, a star on the repo would be appreciated.
